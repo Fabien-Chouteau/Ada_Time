@@ -1,0 +1,32 @@
+with "../../../pebble-binding/Pebble_Binding";
+with "../../Patris_Common/Patris_Common";
+
+project Patris is
+  for Languages    use ("Ada");
+  for Source_Dirs  use ("src");
+  for Object_Dir   use  "obj";
+
+  for Library_Name use "ada_Patris";
+  for Library_Dir  use "lib";
+  for Library_Kind use "static";
+
+  for Target use "arm-eabi";
+  for Runtime ("Ada") use "ravenscar-sfp-stm32f4";
+
+   type Build_Type is ("Debug", "Release");
+   Build : Build_Type := external ("Build", "Debug");
+
+   Build_Switches := ("-gnat12", "-gnatwa", "-gnatwe",
+                      "-gnatyg", "-gnaty-d", "-gnatw.X");
+   case Build is
+      when "Debug" =>
+         Build_Switches := Build_Switches & ("-g", "-O0");
+      when "Release" =>
+         Build_Switches := Build_Switches & ("-O3");
+   end case;
+
+  package Compiler is
+     for Default_Switches ("Ada") use ("-mcpu=cortex-m3", "-mthumb", "-fPIE",
+                                       "-mfloat-abi=softfp") & Build_Switches;
+  end Compiler;
+end Patris ;
