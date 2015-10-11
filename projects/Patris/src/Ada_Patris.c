@@ -9,6 +9,12 @@ void ada_main(void);
 extern int ada_patrisinit ()  __attribute__((weak));;
 extern int ada_patrisfinal ()  __attribute__((weak));;
 
+extern int patris_commoninit ()  __attribute__((weak));;
+extern int patris_commonfinal ()  __attribute__((weak));;
+
+extern int pebble_bindinginit ()  __attribute__((weak));;
+extern int pebble_bindingfinal ()  __attribute__((weak));;
+
 int main(void) {
 
     /* Elaboration */
@@ -16,9 +22,25 @@ int main(void) {
         ada_patrisinit();
     }
 
+    if (patris_commoninit) {
+        patris_commoninit();
+    }
+
+    if (pebble_bindinginit) {
+        pebble_bindinginit();
+    }
+
     ada_main();
 
     if (ada_patrisfinal) {
         ada_patrisfinal();
+    }
+
+    if (patris_commonfinal) {
+        patris_commonfinal();
+    }
+
+    if (pebble_bindingfinal) {
+        pebble_bindingfinal();
     }
 }
