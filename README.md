@@ -7,7 +7,7 @@ Time](https://www.pebble.com/) smartwatch.
 This repository contains two examples that you can install to your watch:
  - [Patris](http://apps.getpebble.com/en_US/application/559af16358bc81d930000067) : It's a game inspired by the famous classic falling blocks.
    [Download it here.](http://apps.getpebble.com/en_US/application/559af16358bc81d930000067)
- - Patris watchface (soon...) : Falling blocks telling you what time is it.
+ - [Patris watchface](http://apps.getpebble.com/en_US/application/561a73451a1d8994a700007e) : Falling blocks telling you what time is it. [Download it here.](http://apps.getpebble.com/en_US/application/561a73451a1d8994a700007e)
 
 ## Install
 
