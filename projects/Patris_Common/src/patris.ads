@@ -28,11 +28,13 @@
 with Interfaces.C; use Interfaces.C;
 
 package Patris with
-  SPARK_Mode
+  SPARK_Mode => On,
+  Abstract_State => (Game_State, Score_State, Best_Score_State),
+  Initializes    => (Game_State, Score_State, Best_Score_State)
 is
    type Score_T is mod 100_000;
 
-      --  possible content of the board cells
+   --  possible content of the board cells
    type Cell is (Empty, I, O, J, L, S, T, Z);
 
    --  subset of cells that correspond to a shape
@@ -53,7 +55,8 @@ is
    type Line is array (X_Coord) of Cell with Pack;
    type Board is array (Y_Coord) of Line;
 
-   Cur_Board : Board;
+   function Get_Board return Board
+     with Global => (Input => Game_State);
 
    --  the current piece has a shape, a direction, and a coordinate for the
    --  top left corner of the square box enclosing the piece:
@@ -73,8 +76,11 @@ is
       Y : PY_Coord;
    end record with Pack;
 
-   Cur_Piece  : Piece;
-   Next_Piece : Piece;
+   function Get_Piece return Piece
+     with Global => (Input => Game_State);
+
+   function Get_Next_Piece return Piece
+     with Global => (Input => Game_State);
 
    --  the game loops through the following states:
    --    . a piece is falling, in which case Cur_Piece is set to this piece
@@ -84,9 +90,11 @@ is
    --      lines that need to be deleted
    --    . complete lines have been deleted from the board
 
-   type State is (Piece_Falling, Piece_Blocked, Board_Before_Clean, Board_After_Clean);
+   type State is (Piece_Falling, Piece_Blocked, Board_Before_Clean,
+                  Board_After_Clean, Game_Over);
 
-   Cur_State : State := Board_After_Clean;
+   function Get_State return State
+     with Global => (Input => Game_State);
 
    --  orientations of shapes are taken from the Super Rotation System at
    --  http://tetris.wikia.com/wiki/SRS
@@ -156,7 +164,10 @@ is
      (for all X in X_Coord => L(X) = Empty);
 
    function No_Complete_Lines (B : Board) return Boolean is
-      (for all Y in Y_Coord => not Is_Complete_Line (B(Y)))
+     (for all Y in Y_Coord => not Is_Complete_Line (B(Y)));
+
+   function Is_Empty (B : Board) return Boolean is
+      (for all Y in Y_Coord => Is_Empty_Line (B(Y)))
    with Ghost;
 
    function No_Overlap (B : Board; P : Piece) return Boolean is
@@ -172,12 +183,18 @@ is
               (for all X in Three_Delta =>
                  (if Possible_Three_Shapes (P.S, P.D) (Y, X) then Is_Empty (B, P.Y + Y, P.X + X)))));
 
-   function Valid_Configuration return Boolean is
+
+   function Valid_Configuration (Cur_Board : Board;
+                                 Cur_State : State;
+                                 Cur_Piece : Piece) return Boolean is
       (case Cur_State is
          when Piece_Falling | Piece_Blocked => No_Overlap (Cur_Board, Cur_Piece),
          when Board_Before_Clean => True,
-         when Board_After_Clean => No_Complete_Lines (Cur_Board))
-   with Ghost;
+         when Game_Over => True,
+          when Board_After_Clean => No_Complete_Lines (Cur_Board));
+
+   function Valid_Configuration return Boolean with Global => Game_State;
+   --  Valid configuration of the current game
 
    --  movements of the piece in the 3 possible directions
 
@@ -209,39 +226,55 @@ is
    with
      Pre => Move_Is_Possible (P, A);
 
-   procedure Do_Action (A : Action; Success : out Boolean) with
-     Pre  => Valid_Configuration,
-     Post => Valid_Configuration;
+   procedure Set_Game_State (New_Board                     : Board;
+                             New_Cur_State                 : State;
+                             New_Cur_Piece, New_Next_Piece : Piece) with
+     Global => (Output => (Game_State)),
+     Pre    => Valid_Configuration (New_Board, New_Cur_State, New_Cur_Piece),
+     Post   => Valid_Configuration;
 
-   procedure Include_Piece_In_Board with
-     Global => (Input => Cur_Piece, In_Out => (Cur_State, Cur_Board)),
-     Pre    => Cur_State = Piece_Blocked and then
-               Valid_Configuration,
-     Post   => Cur_State = Board_Before_Clean and then
+   procedure Game_Reset with
+     Global => (Output => (Game_State, Score_State)),
+     Post   => Get_State = Board_After_Clean and then
+               Is_Empty (Get_Board) and then
                Valid_Configuration;
-   --  transition from state where a piece is falling to its integration in the
-   --  board when it cannot fall anymore.
-
-   procedure Delete_Complete_Lines with
-     Global => (Proof_In => Cur_Piece, In_Out => (Cur_State, Cur_Board)),
-     Pre    => Cur_State = Board_Before_Clean and then
-               Valid_Configuration,
-     Post   => Cur_State = Board_After_Clean and then
-               Valid_Configuration;
-   --  remove all complete lines from the board
-
-   procedure Game_Reset;
 
    procedure Game_Step
-     (Redraw_Board, Redraw_Score, Redraw_Current_Piece : out Boolean);
+     (Redraw_Board, Redraw_Score, Redraw_Current_Piece : out Boolean) with
+     Global => (In_Out => (Game_State, Score_State, Best_Score_State)),
+     Pre    => Valid_Configuration,
+     Post   => Valid_Configuration;
 
-   function Get_Score return Score_T;
-   procedure Set_Score (Score : Score_T);
-   function Get_Best_Score return Score_T;
-   procedure Set_Best_Score (Score : Score_T);
-   function Get_Level return Score_T;
-   procedure Set_Level (Lvl : Score_T);
-   procedure Action_Request (A : Action);
-   function Get_Step_Interval return Natural;
+   procedure Action_Request (A : Action) with
+     Global => (In_Out => (Game_State)),
+     Pre    => Valid_Configuration,
+     Post   => Valid_Configuration;
+
+   function Get_Score return Score_T
+     with Global => (Input => Score_State);
+
+   procedure Set_Score (Score : Score_T) with
+     Global => (In_Out => Score_State);
+
+   function Get_Best_Score return Score_T
+     with Global => (Input => Best_Score_State);
+
+   procedure Set_Best_Score (Score : Score_T) with
+     Global => (Output => Best_Score_State);
+
+   function Get_Level return Score_T
+     with Global => (Input => Score_State);
+
+   procedure Set_Level (Lvl : Score_T) with
+     Global => (In_Out => Score_State);
+
+   function Get_Line_Counter return Score_T
+     with Global => (Input => Score_State);
+
+   procedure Set_Line_Counter (Lines : Score_T) with
+     Global => (In_Out => Score_State);
+
+   function Get_Step_Interval return Natural
+     with Global => (Input => (Game_State, Score_State));
 end Patris;
 

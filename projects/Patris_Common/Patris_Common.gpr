@@ -26,4 +26,8 @@ library Project Patris_Common Is
                                        "-mfloat-abi=softfp");
   end Compiler;
 
+   package Builder is
+      for Global_Compilation_Switches ("Ada") use
+        ("-gnateT=" & Patris_Common'Project_Dir & "/target.atp");
+   end Builder;
 end Patris_Common;

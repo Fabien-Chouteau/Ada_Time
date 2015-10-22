@@ -124,7 +124,7 @@ package body Main_Window is
       if Is_Repeating (Recognizer) = 0 then
          case Get_Button_Id (Recognizer) is
          when Button_Id_Up =>
-            if Patris.Cur_State = Piece_Blocked then
+            if Patris.Get_State = Game_Over then
                Patris.Game_Reset;
             end if;
             Game_Window.Push;

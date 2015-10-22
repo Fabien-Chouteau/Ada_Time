@@ -58,7 +58,7 @@ package body Patris.Clock is
 
       --  update current state
 
-      Cur_State := Board_Before_Clean;
+      -- Cur_State := Board_Before_Clean;
    end Include_Piece_In_Board;
 
    function Step return Boolean is

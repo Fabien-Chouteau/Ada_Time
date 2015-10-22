@@ -106,7 +106,7 @@ package body Game_Window is
    procedure Update_Board_Layer (L : Layer; Ctx : Gcontext) is
       pragma Unreferenced (L);
    begin
-      Draw_Board (Ctx, Cur_Board);
+      Draw_Board (Ctx, Get_Board);
       Draw_Walls (Ctx);
    end Update_Board_Layer;
 
@@ -136,7 +136,7 @@ package body Game_Window is
 
       --  Next piece
       Draw_Shape (Ctx, Center_Point (Next_Box),
-                  (Next_Piece.S, Next_Piece.D, 0, 0),
+                  (Get_Next_Piece.S, Get_Next_Piece.D, 0, 0),
                   Preview => True);
 
       --  Score
