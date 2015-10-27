@@ -27,6 +27,17 @@ package body Pebble.Generic_Persistent_Storage is
       end if;
    end Write;
 
+   -----------
+   -- Write --
+   -----------
+
+   function Write (Data : Data_Type) return Boolean is
+      Success : Boolean;
+   begin
+      Write (Data, Success);
+      return Success;
+   end Write;
+
    ----------
    -- Read --
    ----------
@@ -47,6 +58,17 @@ package body Pebble.Generic_Persistent_Storage is
       else
          Success := False;
       end if;
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
+   function Read (Data : out Data_Type) return Boolean is
+      Success : Boolean;
+   begin
+      Read (Data, Success);
+      return Success;
    end Read;
 
    ------------
