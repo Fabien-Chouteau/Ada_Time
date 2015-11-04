@@ -7,6 +7,7 @@ with Pebble.Graphics; use Pebble.Graphics;
 with Pebble.Eventservice.Ticktimer; use Pebble.Eventservice.Ticktimer;
 with Patris.Clock; use Patris.Clock;
 with Pebble.Timer; use Pebble.Timer;
+with Pebble.Walltime; use Pebble.Walltime;
 
 package body Patris.Watchface is
 
@@ -35,9 +36,9 @@ package body Patris.Watchface is
    begin
       Mark_Dirty (Canvas_Layer);
       if Patris.Clock.Step then
-         Refresh_Timer := Register (Timout_Ms     => 50,
+         Refresh_Timer := Register (Timout_Ms     => 34,
                                     Callback      => Step_Tick'Access,
-                                    Callback_Data => System.Null_Address);
+                                    Callback_Data => Null_Opaque_Ptr);
       end if;
    end Step_Tick;
 
@@ -107,22 +108,31 @@ package body Patris.Watchface is
 
    procedure Minute_Handler (Tick_Time : access Tm; arg2 : Time_Units) is
       pragma Unreferenced (arg2);
-
+      H : Integer := Natural (Tick_Time.Tm_Hour);
+      M : constant Integer := Integer (Tick_Time.Tm_Min);
    begin
-      if Value (Tick_Time.Tm_Min mod 10) /= Last_Digits (3) then
-         Last_Digits (3) := Value (Tick_Time.Tm_Min mod 10);
+
+      if Is_24h_Style /= 1 and then H /= 12 then
+         H := H mod 12;
+      end if;
+
+      if Value (M mod 10) /= Last_Digits (3) then
+         Last_Digits (3) := Value (M mod 10);
          Drop (3, Last_Digits (3));
       end if;
-      if Value (Tick_Time.Tm_Min / 10) /= Last_Digits (2) then
-         Last_Digits (2) := Value (Tick_Time.Tm_Min / 10);
+
+      if Value (M / 10) /= Last_Digits (2) then
+         Last_Digits (2) := Value (M / 10);
          Drop (2, Last_Digits (2));
       end if;
-      if Value (Tick_Time.Tm_Hour mod 10) /= Last_Digits (1) then
-         Last_Digits (1) := Value (Tick_Time.Tm_Hour mod 10);
+
+      if Value (H mod 10) /= Last_Digits (1) then
+         Last_Digits (1) := Value (H mod 10);
          Drop (1, Last_Digits (1));
       end if;
-      if Value (Tick_Time.Tm_Hour / 10) /= Last_Digits (0) then
-         Last_Digits (0) := Value (Tick_Time.Tm_Hour / 10);
+
+      if Value (H / 10) /= Last_Digits (0) then
+         Last_Digits (0) := Value (H / 10);
          Drop (0, Last_Digits (0));
       end if;
       Step_Tick (System.Null_Address);

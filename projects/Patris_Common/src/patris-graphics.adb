@@ -130,10 +130,6 @@ package body Patris.Graphics is
       Offset : Gpoint := (0, 0))
    is
    begin
-      if Get_State = Piece_Falling then
-         Draw_Shape (Ctx, (Offset.X, Offset.Y - Rect_Size), Get_Piece);
-      end if;
-
       for Y in Y_Coord loop
          for X in X_Coord loop
             if B (Y)(X) /= Empty then

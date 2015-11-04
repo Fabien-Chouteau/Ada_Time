@@ -5,7 +5,8 @@ with Pebble.Graphics; use Pebble.Graphics;
 
 package body Patris.Clock is
 
-   Digit_Board : array (Digit) of Board;
+   Digit_Board : array (Digit) of Board :=
+     (others => (others => (others => Empty)));
    Digit_Sequence : array (Digit, Sequence_Range) of Piece;
    Digit_Sequence_Lenght : array (Digit) of Natural := (others => 0);
    Cur_Index : array (Digit) of Natural := (others => 0);
@@ -57,8 +58,6 @@ package body Patris.Clock is
       end case;
 
       --  update current state
-
-      -- Cur_State := Board_Before_Clean;
    end Include_Piece_In_Board;
 
    function Step return Boolean is
@@ -167,7 +166,5 @@ package body Patris.Clock is
          end if;
       end loop;
    end Draw;
-
-
 
 end Patris.Clock;

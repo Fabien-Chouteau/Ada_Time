@@ -3,7 +3,7 @@
   "shortName": "Patris_Watchface",
   "longName": "Patris_Watchface",
   "companyName": "Fabien",
-  "versionLabel": "1.0",
+  "versionLabel": "1.1",
   "sdkVersion": "3",
   "targetPlatforms": ["basalt"],
   "watchapp": {
