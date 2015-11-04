@@ -74,6 +74,7 @@ package body Game_Window is
             when Button_Id_Select => Action_Request (Turn_Counter_Clockwise);
             when others => null;
          end case;
+         Mark_Dirty (Board_Layer);
       end if;
    end Button_Handler;
 
@@ -104,10 +105,29 @@ package body Game_Window is
    ------------------------
 
    procedure Update_Board_Layer (L : Layer; Ctx : Gcontext) is
-      pragma Unreferenced (L);
+      Bounds : constant Grect := Get_Bounds (L);
+      Over_Box : constant Grect :=
+        ((5, Bounds.Size.H / 2 - 10), (Bounds.Size.W - 10, 20));
    begin
       Draw_Board (Ctx, Get_Board);
       Draw_Walls (Ctx);
+
+      if Get_State = Game_Over then
+         Set_Fill_Color (Ctx, Colors.Black);
+         Fill_Rect (Ctx, Over_Box, Corners_Radius, Gcornersall);
+         Set_Stroke_Color (Ctx, Frames_Color);
+         Set_Stroke_Width (Ctx, 1);
+         Draw_Round_Rect (Ctx, Over_Box, Corners_Radius);
+
+         Set_Text_Color (Ctx, Colors.White);
+         Draw_Text (Ctx           => Ctx,
+                    Text          => UI_Texts.Get_Str (UI_Texts.ID_Game_Over),
+                    Font          => Font,
+                    Box           => Over_Box,
+                    Overflow_Mode => Gtextoverflowmodefill,
+                    Alignment     => Gtextalignmentcenter,
+                    Cache         => Null_Cacheref);
+      end if;
    end Update_Board_Layer;
 
    ------------------------
@@ -196,9 +216,11 @@ package body Game_Window is
       Redraw_Board, Redraw_Score, Redraw_Current_Piece : Boolean;
    begin
       Game_Step (Redraw_Board, Redraw_Score, Redraw_Current_Piece);
+
       if Redraw_Board or else Redraw_Current_Piece then
          Mark_Dirty (Board_Layer);
       end if;
+
       if Redraw_Score then
          Mark_Dirty (Score_Layer);
       end if;
