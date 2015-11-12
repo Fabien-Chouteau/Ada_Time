@@ -3,6 +3,7 @@
 Ada_Time is a lightweight binding for the [Pebble
 Time](https://www.pebble.com/) smartwatch.
 
+More info about this project: http://blog.adacore.com/make-with-ada-formal-proof-on-my-wrist
 
 This repository contains two examples that you can install to your watch:
  - [Patris](http://apps.getpebble.com/en_US/application/559af16358bc81d930000067) : It's a game inspired by the famous classic falling blocks.
